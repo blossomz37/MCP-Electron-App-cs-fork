@@ -13,6 +13,34 @@
   gap: 0;
 }
 
+/* hiddenInset keeps native macOS window buttons inside our content area. */
+:root.platform-macos {
+  --top-bar-height: 56px;
+}
+
+.platform-macos .top-bar {
+  flex-direction: row;
+  align-items: center;
+  height: var(--top-bar-height);
+  box-sizing: border-box;
+  padding: 0 16px 0 96px;
+  gap: 16px;
+}
+
+.platform-macos .top-bar > .top-bar-left {
+  flex: 1 1 0;
+}
+
+.platform-macos .top-bar > .top-bar-center {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.platform-macos .top-bar-center .top-bar-action {
+  flex-shrink: 0;
+}
+
 /* Top bar rows (for Windows two-row layout) */
 .top-bar-row {
   display: flex;

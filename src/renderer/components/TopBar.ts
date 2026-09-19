@@ -47,6 +47,9 @@ export class TopBar {
    * Initialize the top bar
    */
   public initialize(): void {
+    document.documentElement.classList.toggle(
+      'platform-macos', navigator.platform.toLowerCase().includes('mac')
+    );
     this.render();
     this.attachEventListeners();
     console.log('[TopBar] Initialized');
