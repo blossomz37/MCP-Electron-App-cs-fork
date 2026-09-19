@@ -177,6 +177,19 @@
   display: none;
 }
 
+/* Center the icon rail without the expanded menu's label padding. */
+.sidebar.collapsed .nav-item,
+.sidebar.collapsed .pinned-plugin-item {
+  justify-content: center;
+  padding-inline: 0;
+  gap: 0;
+}
+
+.sidebar.collapsed .nav-item {
+  /* Balance the left selection border so the icon is truly centered. */
+  border-right: 3px solid transparent;
+}
+
 /* Navigation item badge (for notifications) */
 .nav-item-badge {
   background: var(--color-accent);
