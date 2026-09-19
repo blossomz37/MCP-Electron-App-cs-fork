@@ -4,10 +4,10 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { randomUUID } = require('node:crypto');
 const { ThemeStore } = require('./store.cjs');
-const { validateTheme, clone, themeCSS } = require('./theme.cjs');
+const { validateTheme, clone, themeCSS, validateReference, MAX_CUSTOMS } = require('./theme.cjs');
 class ThemesPlugin {
   constructor() {
-    this.id = 'fictionlab-themes'; this.name = 'Themes'; this.version = '0.1.1';
+    this.id = 'fictionlab-themes'; this.name = 'Themes';
     this.windows = new Map(); this.channels = []; this.queue = Promise.resolve(); this.active = false;
   }
   enqueue(task) {
@@ -19,7 +19,7 @@ class ThemesPlugin {
     return !contents.isDestroyed() && /\/dist\/renderer\/index\.html(?:[?#]|$)/.test(contents.getURL());
   }
   async onActivate(context) {
-    this.context = context;
+    this.context = context; this.version = context.plugin.version;
     this.store = new ThemeStore(context.services.environment.getUserDataPath());
     this.fontBase = pathToFileURL(path.join(context.plugin.installPath, 'assets', 'fonts')).href;
     try {
@@ -39,20 +39,33 @@ class ThemesPlugin {
       handle('cancel', async () => {
         this.previewOwner = null; this.current = this.state.applied; await this.applyAll(); return clone(this.state);
       });
-      handle('apply', async (_event, theme) => {
-        const next = { ...this.state, applied: validateTheme(theme) };
+      handle('apply', async (_event, theme, ref = null) => {
+        const applied = validateTheme(theme);
+        const next = { ...this.state, applied, appliedRef: validateReference(ref, applied, this.state.customs) };
         this.state = await this.store.save(next);
         this.previewOwner = null; this.current = this.state.applied; await this.applyAll(); return clone(this.state);
       });
       handle('save-custom', async (_event, name, theme) => {
-        if (typeof name !== 'string' || !name.trim() || name.trim().length > 60) throw new Error('Enter a theme name of 1–60 characters.');
-        if (this.state.customs.some(x => x.name.toLowerCase() === name.trim().toLowerCase())) throw new Error('That name already exists. Choose a different name.');
-        if (this.state.customs.length >= 100) throw new Error('You have reached the 100-theme limit.');
+        name = this.validName(name);
+        if (this.state.customs.length >= MAX_CUSTOMS) throw new Error('You can save up to five custom themes. Delete one to make room.');
         const validated = validateTheme(theme);
         if (!validated) throw new Error('Choose a preset to customize first.');
-        this.state = await this.store.save({ ...this.state, applied: validated,
-          customs: [...this.state.customs, { id: randomUUID(), name: name.trim(), theme: validated }] });
+        const id = randomUUID();
+        this.state = await this.store.save({ ...this.state, applied: validated, appliedRef: `custom:${id}`,
+          customs: [...this.state.customs, { id, name, theme: validated }] });
         this.previewOwner = null; this.current = this.state.applied; await this.applyAll(); return clone(this.state);
+      });
+      handle('rename-custom', async (_event, id, name) => {
+        this.customById(id); name = this.validName(name, id);
+        this.state = await this.store.save({ ...this.state, customs: this.state.customs.map(x => x.id === id ? { ...x, name } : x) });
+        return clone(this.state);
+      });
+      handle('delete-custom', async (_event, id) => {
+        this.customById(id);
+        this.state = await this.store.save({ ...this.state,
+          appliedRef: this.state.appliedRef === `custom:${id}` ? null : this.state.appliedRef,
+          customs: this.state.customs.filter(x => x.id !== id) });
+        return clone(this.state);
       });
       this.onWindow = (_event, win) => this.attach(win);
       app.on('browser-window-created', this.onWindow);
@@ -60,6 +73,17 @@ class ThemesPlugin {
       await this.enqueue(() => this.applyAll());
       context.logger.info('Themes activated; settings are stored outside the plugin installation.');
     } catch (error) { await this.onDeactivate(); throw error; }
+  }
+  customById(id) {
+    const item = typeof id === 'string' && this.state.customs.find(x => x.id === id);
+    if (!item) throw new Error('That saved theme no longer exists.');
+    return item;
+  }
+  validName(name, exceptId) {
+    if (typeof name !== 'string' || !name.trim() || name.trim().length > 60) throw new Error('Enter a theme name of 1–60 characters.');
+    name = name.trim();
+    if (this.state.customs.some(x => x.id !== exceptId && x.name.toLowerCase() === name.toLowerCase())) throw new Error('That name already exists. Choose a different name.');
+    return name;
   }
   attach(win) {
     if (!this.active || this.windows.has(win.id)) return;

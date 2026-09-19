@@ -1,6 +1,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const root = __dirname;
+const manifest = require('./plugin.json');
+const pkg = require('./package.json');
+pkg.version = manifest.version;
+fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
 for (const dir of ['dist', 'dist-renderer']) fs.mkdirSync(path.join(root, dir), { recursive: true });
 for (const file of ['index.cjs', 'store.cjs', 'theme.cjs']) {
   fs.copyFileSync(path.join(root, 'src', file), path.join(root, 'dist', file));
