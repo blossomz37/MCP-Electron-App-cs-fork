@@ -405,3 +405,12 @@ body {
 .error-message strong {
   color: #FEE2E2;
 }
+
+/* Keep the About logo within three lines of surrounding body text. */
+.about-logo {
+  display: block;
+  height: 3lh;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
