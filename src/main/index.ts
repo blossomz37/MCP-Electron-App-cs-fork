@@ -2897,6 +2897,12 @@ app.whenReady().then(async () => {
   initializeLogger();
   logger.info('App is ready');
 
+  // Finder does not inherit the shell PATH. Apply our existing macOS tool
+  // paths before plugins/MCP clients spawn node or service checks run docker.
+  if (process.platform === 'darwin') {
+    process.env.PATH = prerequisites.getFixedEnv().PATH;
+  }
+
   // Set Windows App User Model ID for proper taskbar behavior
   if (process.platform === 'win32') {
     app.setAppUserModelId('net.fictionlab.studio');
