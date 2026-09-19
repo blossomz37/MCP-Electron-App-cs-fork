@@ -7,7 +7,7 @@ const { ThemeStore } = require('./store.cjs');
 const { validateTheme, clone, themeCSS } = require('./theme.cjs');
 class ThemesPlugin {
   constructor() {
-    this.id = 'fictionlab-themes'; this.name = 'Themes'; this.version = '0.1.0';
+    this.id = 'fictionlab-themes'; this.name = 'Themes'; this.version = '0.1.1';
     this.windows = new Map(); this.channels = []; this.queue = Promise.resolve(); this.active = false;
   }
   enqueue(task) {

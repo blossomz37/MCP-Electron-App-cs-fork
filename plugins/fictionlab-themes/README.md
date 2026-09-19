@@ -12,6 +12,8 @@ Fonts are bundled or use system fallbacks; there are no font downloads. The font
 
 ## Build and install
 
+Version 0.1.1 gives standard single-choice dropdowns a consistent 14px arrow inset and reserves room for the arrow. This shared rule applies across the app while a theme is active; custom dropdown widgets and native OS menus keep their own controls.
+
 ```sh
 cd plugins/fictionlab-themes
 npm run build
