@@ -1,0 +1,7 @@
+{
+  "name": "fictionlab-themes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monochrome, Electric Creative, and custom themes for FictionLab",
+  "scripts": { "build": "node build.cjs", "test": "node --test test/*.test.cjs" }
+}

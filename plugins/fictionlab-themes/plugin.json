@@ -1,0 +1,12 @@
+{
+  "id": "fictionlab-themes",
+  "name": "Themes",
+  "version": "0.1.0",
+  "description": "Choose a preset or personalize interface colors and fonts.",
+  "author": "Carlo Santiago",
+  "fictionLabVersion": ">=0.9.1 <0.10.0",
+  "pluginType": "utility",
+  "entry": { "main": "dist/index.cjs", "renderer": "dist-renderer/index.js" },
+  "permissions": { "fileSystem": true, "database": false, "mcp": [] },
+  "ui": { "mainView": "carlo-themes", "mainViewLabel": "Themes", "mainViewIcon": "◐" }
+}
